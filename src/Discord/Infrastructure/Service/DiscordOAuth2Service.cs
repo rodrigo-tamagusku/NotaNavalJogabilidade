@@ -16,8 +16,8 @@ namespace Discord.Infrastructure.Service
         {
             { "client_id", settings.ClientId },
             { "client_secret", settings.ClientSecret },
-            { "grant_type", "authorization_code" },
-            { "code", settings.Code },
+            { "grant_type", "client_credentials" },
+            { "scope", "identify connections" },
             { "redirect_uri", redirectUri }
         };
 
