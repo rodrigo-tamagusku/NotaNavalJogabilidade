@@ -8,6 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Folder Include="Application\Common\Interfaces\" />
+    <Folder Include="Data\" />
+    <Folder Include="Domain\Base\" />
+    <Folder Include="Domain\Configurations\" />
+    <Folder Include="Infrastructure\Service\" />
     <Folder Include="Presentation\" />
   </ItemGroup>
 

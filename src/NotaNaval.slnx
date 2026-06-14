@@ -1,4 +1,4 @@
 <Solution>
-  <Project Path="Discord/Discord.csproj" Id="5f48620d-b6da-46ce-9bcb-2193167bfeb1" />
+  <Project Path="Discord/NotaNaval.csproj" Id="5f48620d-b6da-46ce-9bcb-2193167bfeb1" />
   <Project Path="NotaNaval.Tests/NotaNaval.Tests.csproj" Id="e3dbf1db-ccde-4345-b083-5da57e18e432" />
 </Solution>
