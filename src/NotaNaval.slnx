@@ -1,0 +1,8 @@
+<Solution>
+  <Project Path="NotaNaval/NotaNaval/NotaNaval.Shared/NotaNaval.Shared.csproj" Id="c13a645e-a541-41a1-a70d-516da03b95ce" />
+  <Project Path="NotaNaval/NotaNaval/NotaNaval.Web.Client/NotaNaval.Web.Client.csproj" Id="3145c91e-137b-42e4-afa0-ef88514c19a8" />
+  <Project Path="NotaNaval/NotaNaval/NotaNaval.Web/NotaNaval.Web.csproj" Id="b3e14729-44c2-4ab9-b538-16438f1e288d" />
+  <Project Path="NotaNaval/NotaNaval/NotaNaval/NotaNaval.csproj" Id="52db8b3b-b938-4726-b46b-e2c7708bc8ff">
+    <Deploy Solution="Debug|*" />
+  </Project>
+</Solution>
