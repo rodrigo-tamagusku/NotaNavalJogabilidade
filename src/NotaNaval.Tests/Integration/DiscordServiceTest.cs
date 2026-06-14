@@ -1,26 +1,33 @@
 ﻿using Discord.Application.UseCase;
+using Discord.Domain.Configurations;
 using Discord.Infrastructure.Service;
+using Microsoft.Extensions.Configuration;
 
 namespace NotaNaval.Tests.Integration
 {
     public class DiscordServiceTest
     {
         private DownloadGroupFilesUseCase useCase;
+        private IConfigurationRoot config;
+        private DiscordApiSettings settings;
 
         public DiscordServiceTest()
         {
-            var botToken = "YOUR_BOT_TOKEN_HERE";
-
             using var httpClient = new HttpClient();
-            var discordService = new DiscordService(httpClient, botToken);
-            this.useCase = new DownloadGroupFilesUseCase(discordService);
 
-            Console.WriteLine("Download complete.");
+            config = new ConfigurationBuilder()
+                .AddUserSecrets<DiscordServiceTest>()
+                .Build();
+
+            settings = new DiscordApiSettings();
+            config.GetSection(DiscordApiSettings.SectionName).Bind(settings);
+            var discordService = new DiscordService(httpClient, settings.ApiKeyToken);
+            this.useCase = new DownloadGroupFilesUseCase(discordService);
         }
-        [Fact]
-        public async Task ExecuteAsync_DownloadFilesFromChannelAsync()
+        [Theory]
+        [InlineData(998983907913510993)]
+        public async Task ExecuteAsync_DownloadFilesFromChannelAsync(ulong channelId)
         {
-            ulong channelId = 123456789012345678UL;
             var destinationFolder = @"C:\DiscordDownloads";
             await useCase.ExecuteAsync(channelId, destinationFolder, TestContext.Current.CancellationToken);
         }
