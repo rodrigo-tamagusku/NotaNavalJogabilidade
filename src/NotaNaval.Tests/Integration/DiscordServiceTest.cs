@@ -9,7 +9,8 @@ namespace NotaNaval.Tests.Integration
     {
         private DownloadGroupFilesUseCase useCase;
         private IConfigurationRoot config;
-        private DiscordApiSettings settings;
+        private DiscordOAuthSettings settings;
+        private DiscordOAuth2Service authService;
 
         public DiscordServiceTest()
         {
@@ -19,9 +20,10 @@ namespace NotaNaval.Tests.Integration
                 .AddUserSecrets<DiscordServiceTest>()
                 .Build();
 
-            settings = new DiscordApiSettings();
-            config.GetSection(DiscordApiSettings.SectionName).Bind(settings);
-            var discordService = new DiscordService(httpClient, settings.ApiKeyToken);
+            settings = new DiscordOAuthSettings();
+            config.GetSection(DiscordOAuthSettings.SectionName).Bind(settings);
+            this.authService = new DiscordOAuth2Service(settings);
+            var discordService = new DiscordService(httpClient, settings, authService);
             this.useCase = new DownloadGroupFilesUseCase(discordService);
         }
         [Theory]

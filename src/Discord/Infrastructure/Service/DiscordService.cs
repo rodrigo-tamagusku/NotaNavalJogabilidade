@@ -1,4 +1,5 @@
 ﻿using Discord.Application.Common.Interfaces;
+using Discord.Domain.Configurations;
 using Discord.Rest;
 
 namespace Discord.Infrastructure.Service
@@ -6,18 +7,21 @@ namespace Discord.Infrastructure.Service
     public class DiscordService : IDiscordService
     {
         private readonly HttpClient _httpClient;
-        private readonly string _botToken;
+        private readonly DiscordOAuthSettings settings;
+        private readonly DiscordOAuth2Service authService;
 
-        public DiscordService(HttpClient httpClient, string botToken)
+        public DiscordService(HttpClient httpClient, DiscordOAuthSettings settings, DiscordOAuth2Service authService)
         {
             _httpClient = httpClient;
-            _botToken = botToken;
+            this.settings = settings;
+            this.authService = authService;
         }
 
         public async Task DownloadFilesFromChannelAsync(ulong channelId, string destinationPath, CancellationToken cancellationToken)
         {
             using var discord = new DiscordRestClient();
-            await discord.LoginAsync(TokenType.Bot, _botToken);
+            string? token = await authService.GetBearerTokenAsync();
+            await discord.LoginAsync(TokenType.Bearer, token);
 
             var channel = await discord.GetChannelAsync(channelId) as IMessageChannel;
             if (channel == null) throw new ArgumentException("Invalid channel or bot lacks access.");
