@@ -1,6 +1,6 @@
 ﻿namespace NotaNaval.Domain.Entities
 {
-    public class Participante
+    public record Participante
     {
         public required string Nome { get; set; }
         public string? IconeUrl { get; set; }

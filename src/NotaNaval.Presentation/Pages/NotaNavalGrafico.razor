@@ -1,0 +1,202 @@
+﻿@using MudBlazor
+@using NotaNaval.Domain.Entities
+@using NotaNaval.Infrastructure.ModelBuilder
+
+<MudPaper Class="pa-6" Elevation="2">
+
+    <MudText Typo="Typo.h6" Class="mb-1">Nota Naval</MudText>
+    <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-4">
+        Interessância (X) × Qualidade (Y)
+    </MudText>
+
+    @* ── Grid ──────────────────────────────────────────────────────── *@
+    <div style="position: relative; width: 100%;">
+
+        @* Y-axis label *@
+        <div style="position: absolute; left: 0; top: 50%;
+            transform: translateX(-50%) translateY(-50%) rotate(-90deg);
+            white-space: nowrap;">
+            <MudText Typo="Typo.caption" Color="Color.Secondary">
+                Qualidade
+            </MudText>
+        </div>
+
+        @* Chart area *@
+        <div style="margin-left: 48px;">
+
+            @* Y tick labels + rows *@
+            @foreach (var yTick in YTicks)
+            {
+                <div style="display: flex; align-items: center; height: @(CellPx)px;">
+
+                    @* Y label *@
+                    <div style="width: 36px; text-align: right; padding-right: 6px; flex-shrink: 0;">
+                        <MudText Typo="Typo.caption" Color="Color.Secondary">
+                            @yTick.Label
+                        </MudText>
+                    </div>
+
+                    @* Row of cells *@
+                    <div style="display: flex; flex: 1; height: 100%;">
+                        @foreach (var xTick in XTicks)
+                        {
+                            var cellPoints = GetPoints(xTick.Value, yTick.Value);
+                            bool isOriginX = xTick.Value == 0;
+                            bool isOriginY = yTick.Value == 0;
+
+                            <div style="flex: 1; height: 100%; position: relative;
+                                border-left: @(isOriginX ? "2px solid var(--mud-palette-text-secondary)" : "1px solid var(--mud-palette-divider)");
+                                border-bottom: @(isOriginY ? "2px solid var(--mud-palette-text-secondary)" : "1px solid var(--mud-palette-divider)");
+                                background: @GetCellBackground(xTick.Value, yTick.Value);">
+
+                                @* Points in this cell *@
+                                @if (cellPoints.Any())
+                                {
+                                    <div style="position: absolute; inset: 0;
+                                        display: flex; align-items: center;
+                                        justify-content: center; gap: 2px;
+                                        flex-wrap: wrap; padding: 2px;">
+                                        @foreach (var pt in cellPoints)
+                                        {
+                                            <MudTooltip Text="@GetTooltip(pt)" Arrow="true" Placement="Placement.Bottom">
+                                                <MudAvatar Size="Size.Small"
+                                                           Color="@GetAvatarColor(pt.Avaliador)"
+                                                           Style="width:28px; height:28px; font-size:11px; cursor:default;">
+                                                    @GetNome(pt.Avaliador)
+                                                </MudAvatar>
+                                            </MudTooltip>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            @* X tick labels row *@
+            <div style="display: flex; margin-top: 2px;">
+                <div style="width: 36px; flex-shrink: 0;"></div>
+                @foreach (var xTick in XTicks)
+                {
+                    <div style="flex: 1; text-align: center;">
+                        <MudText Typo="Typo.caption" Color="Color.Secondary">
+                            @xTick.Label
+                        </MudText>
+                    </div>
+                }
+            </div>
+
+            @* X-axis label *@
+            <div style="text-align: center; margin-top: 4px;">
+                <MudText Typo="Typo.caption" Color="Color.Secondary">
+                    Interessância
+                </MudText>
+            </div>
+
+        </div>
+    </div>
+
+    @* ── Legend ──────────────────────────────────────────────────── *@
+    <MudDivider Class="my-4" />
+
+    <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center;">
+        @foreach (var avaliador in Avaliadores)
+        {
+            <div style="display: flex; align-items: center; gap: 6px;">
+                <MudAvatar Size="Size.Small"
+                           Color="@GetAvatarColor(avaliador)"
+                           Style="width:24px; height:24px; font-size:10px;">
+                    @GetNome(avaliador)
+                </MudAvatar>
+                <MudText Typo="Typo.body2">@avaliador.Nome</MudText>
+            </div>
+        }
+    </div>
+
+    @* ── Quadrant hint ───────────────────────────────────────────── *@
+    <MudDivider Class="my-4" />
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+        <MudChip T="string" Size="Size.Small" Color="Color.Info" Variant="Variant.Text">
+            ↖ Baixa interessância · Alta qualidade
+        </MudChip>
+        <MudChip T="string" Size="Size.Small" Color="Color.Success" Variant="Variant.Text">
+            ↗ Alta interessância · Alta qualidade
+        </MudChip>
+        <MudChip T="string" Size="Size.Small" Color="Color.Error" Variant="Variant.Text">
+            ↙ Baixa interessância · Baixa qualidade
+        </MudChip>
+        <MudChip T="string" Size="Size.Small" Color="Color.Warning" Variant="Variant.Text">
+            ↘ Alta interessância · Baixa qualidade
+        </MudChip>
+    </div>
+
+</MudPaper>
+
+@code {
+
+    // ── Data ────────────────────────────────────────────────────────────────
+
+    [Parameter]
+    public List<NotaNavalJogo> Items { get; set; } = new();
+
+    // ── Enum mappings ────────────────────────────────────────────────────────
+
+    // X axis → Interessancia: _1=-5 (left) … _10=5 (right)
+    // Y axis → Qualidade:      A=5  (top)  … J=-5  (bottom)
+
+    private record Tick(string Label, int Value);
+
+    // X: Interessancia 1→10, left to right
+    private List<Tick> XTicks { get; } = new()
+    {
+        new("1",  -5), new("2",  -4), new("3",  -3), new("4",  -2), new("5",  -1),
+        new("6",   1), new("7",   2), new("8",   3), new("9",   4), new("10",  5),
+    };
+
+    // Y: Qualidade A→J, top to bottom (rendered top-first)
+    private List<Tick> YTicks { get; } = new()
+    {
+        new("A",  5), new("B",  4), new("C",  3), new("D",  2), new("E",  1),
+        new("F", -1), new("G", -2), new("H", -3), new("I", -4), new("J", -5),
+    };
+
+    private int CellPx => 52;
+
+    // ── Helpers ──────────────────────────────────────────────────────────────
+
+    private List<NotaNavalJogo> GetPoints(int xVal, int yVal)
+        => Items
+            .Where(p => (int)p.Interessancia == xVal && (int)p.Qualidade == yVal)
+            .ToList();
+
+    private string GetCellBackground(int xVal, int yVal)
+    {
+        // xVal = Interessancia, yVal = Qualidade
+        // Top-right  (alta interessância + alta qualidade)  → success (green)
+        // Top-left   (baixa interessância + alta qualidade) → info    (blue)
+        // Bottom-right(alta interessância + baixa qualidade)→ warning (orange)
+        // Bottom-left (baixa interessância + baixa qualidade)→ error  (red)
+        bool highI = xVal > 0;
+        bool highQ = yVal > 0;
+        if (highI && highQ) return "rgba(var(--mud-palette-success-rgb), 0.05)";
+        if (highI && !highQ) return "rgba(var(--mud-palette-warning-rgb), 0.05)";
+        if (!highI && highQ) return "rgba(var(--mud-palette-info-rgb),    0.05)";
+        return "rgba(var(--mud-palette-error-rgb),   0.05)";
+    }
+
+    private string GetTooltip(NotaNavalJogo pt)
+        => $"{pt.Jogo.Nome.TrimStart('_').Replace("_", " ")} — "
+         + $"{pt.Avaliador.Nome} | Nota: {pt.Qualidade.ToString()}{pt.Interessancia.ToString().TrimStart('_')}";
+
+    private string GetNome(Participante avaliador)
+        => avaliador.Nome;
+
+    private Color GetAvatarColor(Participante avaliador) => avaliador switch
+    {
+        _ => Color.Primary,
+    };
+
+    private IEnumerable<Participante> Avaliadores
+        => Items.Select(p => p.Avaliador).Distinct();
+}

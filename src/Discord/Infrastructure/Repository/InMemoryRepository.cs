@@ -5,7 +5,7 @@ using NotaNaval.Infrastructure.ModelBuilder;
 
 namespace NotaNaval.Infrastructure.Repository
 {
-    internal class InMemoryRepository : INotaNavalRepository
+    public class InMemoryRepository : INotaNavalRepository
     {
         public Task<List<NotaNavalJogo>> GetAllNotaNaval()
         {

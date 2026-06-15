@@ -7,7 +7,7 @@ namespace NotaNaval.Infrastructure.ModelBuilder
         public static Participante Tengu => GetTengu();
         public static Participante Andre => GetAndre();
         public static Participante Rafa => GetAndre();
-        public static Participante Sushi => GetAndre();
+        public static Participante Sushi => GetSushi();
 
         private static Participante GetTengu()
         {
@@ -30,6 +30,18 @@ namespace NotaNaval.Infrastructure.ModelBuilder
                 RedesSociais = new()
                 {
                     "https://bsky.app/profile/majin.jogabilida.de"
+                }
+            };
+        }
+        private static Participante GetSushi()
+        {
+            return new()
+            {
+                Nome = "Sushi",
+                IconeUrl = "https://cdn.bsky.app/img/avatar/plain/did:plc:wp66526esbi4oat2hwkpnvct/bafkreig4a7h2f3gak4bgnjmicd6gl5xxxspmjsdosh2n6sl3aqtdp4teoa",
+                RedesSociais = new()
+                {
+                    "https://bsky.app/profile/sushi.jogabilida.de"
                 }
             };
         }

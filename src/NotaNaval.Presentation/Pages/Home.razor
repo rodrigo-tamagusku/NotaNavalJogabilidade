@@ -1,0 +1,17 @@
+﻿@page "/"
+@using MudBlazor
+@using NotaNaval.Application.UseCase;
+@using NotaNaval.Domain.Entities;
+@inject INotaNavalRepository repo;
+<MudContainer>
+    <NotaNavalGrafico Items="@Items"></NotaNavalGrafico>
+</MudContainer>
+
+
+@code {
+    public List<NotaNavalJogo> Items { get; set; } = new();
+    protected override async Task OnInitializedAsync()
+    {
+        this.Items = await repo.GetAllNotaNaval();
+    }
+}
