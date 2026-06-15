@@ -1,166 +1,198 @@
 ﻿@using MudBlazor
 @using NotaNaval.Domain.Entities
 
-<MudPaper Class="pa-6" Elevation="2">
+<MudPaper Style="@PaperStyle" Elevation="4">
 
-    <MudText Typo="Typo.h6" Class="mb-1">Nota Naval</MudText>
-    <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-4">
-        Interessância (X) × Qualidade (Y)
-    </MudText>
-
-    @* ── Grid ──────────────────────────────────────────────────────── *@
-    <div style="position: relative; width: 100%;">
-
-        @* Y-axis label *@
-        <div style="position: absolute; left: 0; top: 50%;
-            transform: translateX(-50%) translateY(-50%) rotate(-90deg);
-            white-space: nowrap;">
-            <MudText Typo="Typo.caption" Color="Color.Secondary">
-                Qualidade
+    @* ── Título barra superior ─────────────────────────────────────── *@
+    <div style="display:flex; justify-content:space-between; align-items:center;
+        border-bottom: 1px solid #a080c0; padding: 6px 12px; margin-bottom: 0;">
+        <div style="display:flex; align-items:center; gap:8px;">
+            <MudIcon Icon="@Icons.Material.Filled.GridOn" Style="color:#d4b8f0; font-size:16px;" />
+            <MudText Style="font-family:monospace; font-size:13px; font-weight:700;
+                color:#d4b8f0; letter-spacing:1px;">
+                ULTIMATE_NOTA_DEFINITIVA_NEM_ADIANTA
             </MudText>
         </div>
+    </div>
 
-        @* Chart area *@
-        <div style="margin-left: 48px;">
+    @* ── Área do gráfico ───────────────────────────────────────────── *@
+    <div style="position:relative; padding: 16px 8px 8px 8px;">
 
-            @* Y tick labels + rows *@
+        @* Label BOM (topo, centro) *@
+        <div style="position:absolute; top:4px; left:50%; transform:translateX(-50%);
+            text-align:center; z-index:2;">
+            <MudText Style="@AxisLabelStyle">BOM</MudText>
+        </div>
+
+        @* Label RUIM (base, centro) — posicionado após o grid via margin *@
+
+        @* Label DESINTERESSANTE (esquerda, meio) *@
+        <div style="position:absolute; left:8px; top:50%; transform:translateY(-50%);
+            text-align:center; z-index:2; max-width:60px; line-height:1.1;">
+            <MudText Style="@AxisLabelStyle">DESINTE<br />RESSANTE</MudText>
+        </div>
+
+        @* Label INTERESSANTE (direita, meio) *@
+        <div style="position:absolute; right:8px; top:50%; transform:translateY(-50%);
+            text-align:center; z-index:2; max-width:60px; line-height:1.1;">
+            <MudText Style="@AxisLabelStyle">INTERES<br />SANTE</MudText>
+        </div>
+
+        @* Grid com margens para os labels laterais *@
+        <div style="margin: 24px 72px 0 72px; position:relative;">
+
+            @* Linhas do grid *@
             @foreach (var yTick in YTicks)
             {
-                <div style="display: flex; align-items: center; height: @(CellPx)px;">
+                <div style="display:flex; height:@(CellPx)px; position:relative;">
 
-                    @* Y label *@
-                    <div style="width: 36px; text-align: right; padding-right: 6px; flex-shrink: 0;">
-                        <MudText Typo="Typo.caption" Color="Color.Secondary">
-                            @yTick.Label
-                        </MudText>
-                    </div>
+                    @* Tick Y (diamante) + label — apenas na metade esquerda do eixo central *@
+                    @* Label Y no eixo central *@
 
-                    @* Row of cells *@
-                    <div style="display: flex; flex: 1; height: 100%;">
-                        @foreach (var xTick in XTicks)
-                        {
-                            var cellPoints = GetPoints(xTick.Value, yTick.Value);
-                            bool isOriginX = xTick.Value == 0;
-                            bool isOriginY = yTick.Value == 0;
+                    @foreach (var xTick in XTicks)
+                    {
+                        bool isAxisX = xTick.IsAxis;
+                        bool isAxisY = yTick.IsAxis;
+                        var cellPoints = GetPoints(xTick.Value, yTick.Value);
+                        bool showXTick = isAxisX && !yTick.IsAxis;
+                        bool showYTick = isAxisY && !xTick.IsAxis;
 
-                            <div style="flex: 1; height: 100%; position: relative;
-                                border-left: @(isOriginX ? "2px solid var(--mud-palette-text-secondary)" : "1px solid var(--mud-palette-divider)");
-                                border-bottom: @(isOriginY ? "2px solid var(--mud-palette-text-secondary)" : "1px solid var(--mud-palette-divider)");
-                                background: @GetCellBackground(xTick.Value, yTick.Value);">
+                        <div style="flex:1; height:100%; position:relative;
+                            border-right: @(isAxisX ? "1px solid #c0a0e0" : "1px dashed #6040a0");
+                            border-bottom: @(isAxisY ? "1px solid #c0a0e0" : "1px dashed #6040a0");">
 
-                                @* Points in this cell *@
-                                @if (cellPoints.Any())
-                                {
-                                    <div style="position: absolute; inset: 0;
-                                        display: flex; align-items: center;
-                                        justify-content: center; gap: 2px;
-                                        flex-wrap: wrap; padding: 2px;">
-                                        @foreach (var pt in cellPoints)
-                                        {
-                                            <MudTooltip Text="@GetTooltip(pt)" Arrow="true" Placement="Placement.Bottom">
-                                                <MudAvatar Size="Size.Small"
-                                                           Color="@GetAvatarColor(pt.Avaliador)"
-                                                           Style="width:28px; height:28px; font-size:11px; cursor:default;">
-                                                    <MudImage Src="@pt.Avaliador.IconeUrl" Alt="@pt.Avaliador.Nome" />
-                                                </MudAvatar>
-                                            </MudTooltip>
-                                        }
-                                    </div>
-                                }
-                            </div>
-                        }
-                    </div>
+                            @* Tick diamante no eixo X (coluna 5→6) para essa linha *@
+                            @if (isAxisX && !isAxisY)
+                            {
+                                <div style="position:absolute; right:-7px; top:50%;
+                                    transform:translateY(-50%); z-index:3;">
+                                    <MudText Style="color:#c0a0e0; font-size:10px; font-family:monospace;">
+                                        ◇
+                                    </MudText>
+                                </div>
+                            }
+
+                            @* Label Y (letra A-J) no eixo vertical *@
+                            @if (isAxisX && !isAxisY)
+                            {
+                                <div style="position:absolute; right:4px; bottom:2px; z-index:3;">
+                                    <MudText Style="font-family:monospace; font-size:10px;
+                                        color:#c0a0e0; font-style:italic;">
+                                        @yTick.Label
+                                    </MudText>
+                                </div>
+                            }
+
+                            @* Tick diamante no eixo Y (linha E→F) para essa coluna *@
+                            @if (isAxisY && !isAxisX)
+                            {
+                                <div style="position:absolute; left:50%; bottom:-7px;
+                                    transform:translateX(-50%); z-index:3;">
+                                    <MudText Style="color:#c0a0e0; font-size:10px; font-family:monospace;">
+                                        ◇
+                                    </MudText>
+                                </div>
+                            }
+
+                            @* Label X (número 1-10) no eixo horizontal *@
+                            @if (isAxisY && !isAxisX)
+                            {
+                                <div style="position:absolute; left:50%; bottom:2px;
+                                    transform:translateX(-50%); z-index:3;">
+                                    <MudText Style="font-family:monospace; font-size:9px;
+                                        color:#c0a0e0; font-style:italic;">
+                                        @xTick.Label
+                                    </MudText>
+                                </div>
+                            }
+
+                            @* Avatares dos participantes *@
+                            @if (cellPoints.Any())
+                            {
+                                <div style="position:absolute; inset:0; display:flex;
+                                    align-items:center; justify-content:center;
+                                    gap:2px; flex-wrap:wrap; z-index:4;">
+                                    @foreach (var pt in cellPoints)
+                                    {
+                                        <MudTooltip Text="@GetTooltip(pt)" Arrow="true" Placement="Placement.Top">
+                                            <MudAvatar Size="Size.Small"
+                                                       Style="width:24px; height:24px; font-size:10px;">
+                                                <MudImage Src="@pt.Avaliador.IconeUrl" Alt="@pt.Avaliador.Nome" />
+                                            </MudAvatar>
+                                        </MudTooltip>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
                 </div>
             }
 
-            @* X tick labels row *@
-            <div style="display: flex; margin-top: 2px;">
-                <div style="width: 36px; flex-shrink: 0;"></div>
-                @foreach (var xTick in XTicks)
-                {
-                    <div style="flex: 1; text-align: center;">
-                        <MudText Typo="Typo.caption" Color="Color.Secondary">
-                            @xTick.Label
-                        </MudText>
-                    </div>
-                }
-            </div>
-
-            @* X-axis label *@
-            <div style="text-align: center; margin-top: 4px;">
-                <MudText Typo="Typo.caption" Color="Color.Secondary">
-                    Interessância
-                </MudText>
+            @* Label RUIM abaixo do grid *@
+            <div style="text-align:center; margin-top:6px;">
+                <MudText Style="@AxisLabelStyle">RUIM</MudText>
             </div>
 
         </div>
     </div>
 
-    @* ── Legend ──────────────────────────────────────────────────── *@
-    <MudDivider Class="my-4" />
-
-    <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center;">
-        @foreach (var avaliador in Avaliadores)
-        {
-            <div style="display: flex; align-items: center; gap: 6px;">
-                <MudAvatar Size="Size.Small"
-                           Color="@GetAvatarColor(avaliador)"
-                           Style="width:24px; height:24px; font-size:10px;">
-                    <MudImage Src="@avaliador.IconeUrl" Alt="@avaliador.Nome" />
-                </MudAvatar>
-                <MudText Typo="Typo.body2">@avaliador.Nome</MudText>
-            </div>
-        }
-    </div>
-
-    @* ── Quadrant hint ───────────────────────────────────────────── *@
-    <MudDivider Class="my-4" />
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-        <MudChip T="string" Size="Size.Small" Color="Color.Info" Variant="Variant.Text">
-            ↖ Baixa interessância · Alta qualidade
-        </MudChip>
-        <MudChip T="string" Size="Size.Small" Color="Color.Success" Variant="Variant.Text">
-            ↗ Alta interessância · Alta qualidade
-        </MudChip>
-        <MudChip T="string" Size="Size.Small" Color="Color.Error" Variant="Variant.Text">
-            ↙ Baixa interessância · Baixa qualidade
-        </MudChip>
-        <MudChip T="string" Size="Size.Small" Color="Color.Warning" Variant="Variant.Text">
-            ↘ Alta interessância · Baixa qualidade
-        </MudChip>
-    </div>
-
+    <MudPaper Class="pa-4 pa-sm-6 mb-4 mb-md-6 d-flex flex-column mud-theme-primary align-center" Elevation="4">
+        <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center;">
+            @foreach (var avaliador in Avaliadores)
+            {
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <MudAvatar Size="Size.Small"
+                               Style="width:24px; height:24px; font-size:10px;">
+                        <MudImage Src="@avaliador.IconeUrl" Alt="@avaliador.Nome" />
+                    </MudAvatar>
+                    <MudText Typo="Typo.body2">@avaliador.Nome</MudText>
+                </div>
+            }
+        </div>
+    </MudPaper>
 </MudPaper>
 
 @code {
 
-    // ── Data ────────────────────────────────────────────────────────────────
+    [Parameter] public List<NotaNavalJogo> Items { get; set; } = new();
 
-    [Parameter]
-    public List<NotaNavalJogo> Items { get; set; } = new();
+    // ── Estilos ─────────────────────────────────────────────────────────────
 
-    // ── Enum mappings ────────────────────────────────────────────────────────
+    private string PaperStyle =>
+        "background: linear-gradient(135deg, #2a0a4a 0%, #1a0535 40%, #2d1060 100%);" +
+        "border: 1px solid #a080c0; border-radius: 4px; overflow:hidden;";
 
-    // X axis → Interessancia: _1=-5 (left) … _10=5 (right)
-    // Y axis → Qualidade:      A=5  (top)  … J=-5  (bottom)
+    private string AxisLabelStyle =>
+        "font-family:monospace; font-size:11px; font-weight:700; " +
+        "color:#e8d0ff; letter-spacing:1px;";
 
-    private record Tick(string Label, int Value);
+    private string AvatarStyle =>
+        "width:48px; height:48px; border:2px solid #c0a0e0; " +
+        "box-shadow: 0 0 8px rgba(192,160,224,0.5);";
 
-    // X: Interessancia 1→10, left to right
+    // ── Ticks ────────────────────────────────────────────────────────────────
+
+    private record Tick(string Label, int Value, bool IsAxis);
+
+    // X: Interessancia 1→10. IsAxis = entre col 5 e 6 (marca a coluna 5, borda direita = eixo)
     private List<Tick> XTicks { get; } = new()
     {
-        new("1",  -5), new("2",  -4), new("3",  -3), new("4",  -2), new("5",  -1),
-        new("6",   1), new("7",   2), new("8",   3), new("9",   4), new("10",  5),
+        new("1",  -5, false), new("2", -4, false), new("3", -3, false),
+        new("4",  -2, false), new("5", -1, true),
+        new("6",   1, false), new("7",  2, false), new("8",  3, false),
+        new("9",   4, false), new("10", 5, false),
     };
 
-    // Y: Qualidade A→J, top to bottom (rendered top-first)
+    // Y: Qualidade A→J top-to-bottom. IsAxis = entre linha E e F (marca linha E, borda inferior = eixo)
     private List<Tick> YTicks { get; } = new()
     {
-        new("A",  5), new("B",  4), new("C",  3), new("D",  2), new("E",  1),
-        new("F", -1), new("G", -2), new("H", -3), new("I", -4), new("J", -5),
+        new("A",  5, false), new("B",  4, false), new("C",  3, false),
+        new("D",  2, false), new("E",  1, true),
+        new("F", -1, false), new("G", -2, false), new("H", -3, false),
+        new("I", -4, false), new("J", -5, false),
     };
 
-    private int CellPx => 52;
+    private int CellPx => 56;
 
     // ── Helpers ──────────────────────────────────────────────────────────────
 
@@ -169,32 +201,12 @@
             .Where(p => (int)p.Interessancia == xVal && (int)p.Qualidade == yVal)
             .ToList();
 
-    private string GetCellBackground(int xVal, int yVal)
-    {
-        // xVal = Interessancia, yVal = Qualidade
-        // Top-right  (alta interessância + alta qualidade)  → success (green)
-        // Top-left   (baixa interessância + alta qualidade) → info    (blue)
-        // Bottom-right(alta interessância + baixa qualidade)→ warning (orange)
-        // Bottom-left (baixa interessância + baixa qualidade)→ error  (red)
-        bool highI = xVal > 0;
-        bool highQ = yVal > 0;
-        if (highI && highQ) return "rgba(var(--mud-palette-success-rgb), 0.05)";
-        if (highI && !highQ) return "rgba(var(--mud-palette-warning-rgb), 0.05)";
-        if (!highI && highQ) return "rgba(var(--mud-palette-info-rgb),    0.05)";
-        return "rgba(var(--mud-palette-error-rgb),   0.05)";
-    }
-
     private string GetTooltip(NotaNavalJogo pt)
-        => $"{pt.Jogo.Nome.TrimStart('_').Replace("_", " ")} — "
-         + $"{pt.Avaliador.Nome} | Nota: {pt.Qualidade.ToString()}{pt.Interessancia.ToString().TrimStart('_')}";
+        => $"{pt.Jogo.Nome.TrimStart('_').Replace("_", " ")} — " +
+           $"{pt.Avaliador.Nome.ToString()} | Nota: {pt.Qualidade}{pt.Interessancia.ToString().TrimStart('_')}";
 
-    private string GetNome(Participante avaliador)
-        => avaliador.Nome;
-
-    private Color GetAvatarColor(Participante avaliador) => avaliador switch
-    {
-        _ => Color.Primary,
-    };
+    private string GetAvatarUrl(Participante avaliador)
+        => avaliador.IconeUrl ?? string.Empty;
 
     private IEnumerable<Participante> Avaliadores
         => Items.Select(p => p.Avaliador).Distinct();
