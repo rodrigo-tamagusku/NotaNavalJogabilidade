@@ -1,6 +1,5 @@
 ﻿@using MudBlazor
 @using NotaNaval.Domain.Entities
-@using NotaNaval.Infrastructure.ModelBuilder
 
 <MudPaper Class="pa-6" Elevation="2">
 
@@ -62,7 +61,7 @@
                                                 <MudAvatar Size="Size.Small"
                                                            Color="@GetAvatarColor(pt.Avaliador)"
                                                            Style="width:28px; height:28px; font-size:11px; cursor:default;">
-                                                    @GetNome(pt.Avaliador)
+                                                    <MudImage Src="@pt.Avaliador.IconeUrl" Alt="@pt.Avaliador.Nome" />
                                                 </MudAvatar>
                                             </MudTooltip>
                                         }
@@ -107,7 +106,7 @@
                 <MudAvatar Size="Size.Small"
                            Color="@GetAvatarColor(avaliador)"
                            Style="width:24px; height:24px; font-size:10px;">
-                    @GetNome(avaliador)
+                    <MudImage Src="@avaliador.IconeUrl" Alt="@avaliador.Nome" />
                 </MudAvatar>
                 <MudText Typo="Typo.body2">@avaliador.Nome</MudText>
             </div>
