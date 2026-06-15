@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Discord\NotaNaval.csproj" />
+    <ProjectReference Include="..\NotaNaval\NotaNaval.csproj" />
   </ItemGroup>
 
   <ItemGroup>
