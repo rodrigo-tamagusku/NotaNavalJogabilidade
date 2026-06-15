@@ -8,6 +8,7 @@ namespace NotaNaval.Domain.Entities
         public required Interessancia Interessancia { get; set; }
         public required Qualidade Qualidade { get; set; }
         public required Videogame Jogo { get; set; }
+        public string? UrlEpisodio {  get; set; }
         public DateTime? DataNota { get; set; }
     }
 }
